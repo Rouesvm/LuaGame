@@ -4,6 +4,8 @@ local entityModule = require("include/entity")
 local playerModule = require("include/player")
 
 local objects = {}
+
+local world = nil
 local player = nil
 
 local function newEntity(entity)
@@ -16,16 +18,19 @@ local function newEntity(entity)
 end
 
 function love2D.load()
+    world = love2D.physics.newWorld(0, 200, true)
+
     player = newEntity({
         texturePath = "assets/player.png",
         size = Vector2.new(5, 5)
     })
 
-    player.Vector2.x = 0
-    player.Vector2.y = 0
+    player.Vector2.x = 11
+    player.Vector2.y = 11
 end
 
 function love2D.update(deltaTime)
+    world:update(deltaTime)
     playerModule:movePlayer(player, deltaTime)
 end
 
