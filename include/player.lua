@@ -29,7 +29,7 @@ function module:getDirection()
     return Vector2.new(x, y)
 end
 
-function module:movePlayer(player, deltaTime)
+function module:movePlayer(player, world, deltaTime)
     local direction = module:getDirection()
     local normalizeDirection = Vector2.normalize(direction)
 
@@ -40,7 +40,7 @@ function module:movePlayer(player, deltaTime)
         local speed = 250
         
         if normalizeDirection.x ~= normalizeDirection.x and
-             normalizeDirection.y ~= normalizeDirection.y 
+             normalizeDirection.y ~= normalizeDirection.y
         then
             normalizeDirection = direction
         end
@@ -58,8 +58,9 @@ function module:movePlayer(player, deltaTime)
         elseif newPosition.y >= offsetY then
             newPosition.y = offsetY - 1
         end
-
-        player.Vector2 = newPosition
+    
+        local actualX, actualY, cols, len = world:move(player, newPosition.x, newPosition.y)
+        player.Vector2 = Vector2.new(actualX, actualY)
     end
 end
 

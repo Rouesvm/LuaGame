@@ -1,12 +1,15 @@
 local love2D       = require("love")
-local Vector2      = require("include.libs.Vector2")
+
+local bump         = require("include.libs.bump")
 local entityModule = require("include/entity")
 local playerModule = require("include/player")
 
+local Vector2      = require("include.libs.Vector2")
+
 local objects = {}
 
-local world = nil
 local player = nil
+local world = bump.newWorld()
 
 local function newEntity(entity)
     local object = entityModule.new(entity)
@@ -14,13 +17,21 @@ local function newEntity(entity)
     object.HASH = #objects + 1
     objects[object.HASH] = object
 
+    world:add(object,
+        object.Vector2.x, object.Vector2.y, 
+        object.Dimensions.x, object.Dimensions.y
+    )
+
     return object
 end
 
 function love2D.load()
-    world = love2D.physics.newWorld(0, 200, true)
-
     player = newEntity({
+        texturePath = "assets/player.png",
+        size = Vector2.new(5, 5)
+    })
+
+    newEntity({
         texturePath = "assets/player.png",
         size = Vector2.new(5, 5)
     })
@@ -30,8 +41,7 @@ function love2D.load()
 end
 
 function love2D.update(deltaTime)
-    world:update(deltaTime)
-    playerModule:movePlayer(player, deltaTime)
+    playerModule:movePlayer(player, world, deltaTime)
 end
 
 function love2D.draw()
