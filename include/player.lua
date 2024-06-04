@@ -33,8 +33,8 @@ function module:movePlayer(player, world, deltaTime)
     local direction = module:getDirection()
     local normalizeDirection = Vector2.normalize(direction)
 
-    local offsetX = width - (player.SpriteSize.x * player.Size.x)
-    local offsetY = height - (player.SpriteSize.y * player.Size.y)
+    local offsetX = width - (player.SpriteSize.x * player.Size)
+    local offsetY = height - (player.SpriteSize.y * player.Size)
 
     if player then
         local speed = 250

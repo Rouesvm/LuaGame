@@ -23,7 +23,7 @@ local function setupEntityTable(self, entity)
         end
 
         if entity.size then
-            self.Size = entity.size
+            self.Size = entity.size or 4
         end
 
         if entity.size and self.Sprite then
@@ -32,20 +32,31 @@ local function setupEntityTable(self, entity)
     else
         self.Sprite = nil
 
-        self.Size = Vector2.ZERO
+        self.Size = 4
         self.SpriteSize = Vector2.ZERO
 
         self.Dimensions = Vector2.ZERO
     end
 end
 
-function module.new(entity)
+function module.initTables(world)
+    local self = {}
+
+    self.player = nil
+
+    self.world = world
+    self.entityList = {}
+
+    return setmetatable(self, module)
+end
+
+function module.newEntity(entity)
     local self = {}
 
     setupEntityTable(self, entity)
 
     self.Health = 0
-    self.Vector2 = Vector2.new(0, 0)
+    self.Vector2 = entity.Position or Vector2.new(0, 0)
 
     return setmetatable(self, module)
 end
@@ -54,8 +65,25 @@ function module:loadEntityImage(texturePath)
     local info = love2D.filesystem.getInfo(texturePath)
     if info then
         self.Sprite = love2D.graphics.newImage(texturePath)
+        self.Sprite:setFilter("nearest", "linear")
+
         return self.Sprite
     end
+end
+
+function module:newWorldEntity(entity, isPlayer) 
+    local object = module.newEntity(entity)
+
+    self.world:add(object,
+         object.Vector2.x, object.Vector2.y,
+         object.Dimensions.x, object.Dimensions.y
+    )
+
+    if not isPlayer then
+        self.entityList[#self.entityList + 1] = object
+    end
+
+    return object
 end
 
 return module

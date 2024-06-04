@@ -6,97 +6,73 @@ local playerModule = require("include/player")
 
 local Vector2      = require("include.libs.Vector2")
 
-local objects = {}
+local entityHandler = entityModule.initTables(bump.newWorld())
 
-local player = nil
-local world = bump.newWorld()
+local function drawWrapper(object)
+    if object.Sprite then
+        love2D.graphics.draw(object.Sprite,
+            object.Vector2.x, object.Vector2.y,
+            0,
+            object.Size, object.Size
+       )
+    end
+end
 
-local function newEntity(entity, Vector2)
-    local object = entityModule.new(entity)
+local function batchLoad(whichWay, settings, count, offsetXORY)
+    local offset = settings.offset or 0
+    local startI = offsetXORY or 0
+    local endI = offsetXORY and count + offsetXORY or count
 
-    print(object)
-
-    object.HASH = #objects + 1
-    objects[object.HASH] = object
-
-    object.Vector2 = Vector2 or object.Vector2 
-
-    world:add(object,
-         object.Vector2.x, object.Vector2.y, 
-         object.Dimensions.x, object.Dimensions.y
-    )
-
-    return object
+    for i=startI, endI do
+        settings.Position = whichWay and Vector2.new(offset, i * 64) or Vector2.new(i * 64, offset)
+        entityHandler:newWorldEntity(settings)
+    end
 end
 
 function love2D.load()
-    player = newEntity({
+    entityHandler.player = entityHandler:newWorldEntity({
         texturePath = "assets/player.png",
-        size = Vector2.new(5, 5)
-    }, Vector2.new(100, 100))
+        Position = Vector2.new(100, 100),
+        size = 5,
+    }, true)
 
-
-    for i=0, 10 do 
-        newEntity({
-            texturePath = "assets/block.png",
-            size = Vector2.new(4, 4)
-        }, Vector2.new(0, i * 64))    
-    end
-
-    for i=0, 8 do
-        newEntity({
-            texturePath = "assets/block.png",
-            size = Vector2.new(4, 4)
-        }, Vector2.new(3 * 64, i * 64))    
-
-        newEntity({
-            texturePath = "assets/block.png",
-            size = Vector2.new(4, 4)
-        }, Vector2.new(6 * 64, i * 64 + 64 + 64))    
-
-        newEntity({
-            texturePath = "assets/block.png",
-            size = Vector2.new(4, 4)
-        }, Vector2.new(9 * 64, i * 64))    
-
-        newEntity({
-            texturePath = "assets/block.png",
-            size = Vector2.new(4, 4)
-        }, Vector2.new(12 * 64, i * 64 + 64 + 64))    
-
-        newEntity({
-            texturePath = "assets/block.png",
-            size = Vector2.new(4, 4)
-        }, Vector2.new(15 * 64, i * 64))    
-
-        newEntity({
-            texturePath = "assets/block.png",
-            size = Vector2.new(4, 4)
-        }, Vector2.new(18 * 64, i * 64 + 64 + 64))    
-    end
-
-    local win = newEntity({
+    batchLoad(false, {
         texturePath = "assets/block.png",
-        size = Vector2.new(4, 4)
-    }, Vector2.new(20 * 64, 8 * 64))    
+        offset = 0,
+        size = 4
+    }, 10, 2)
 
-    player.Vector2.x = 15
-    player.Vector2.y = 15
+    batchLoad(true, {
+        texturePath = "assets/block.png",
+        offset = 0,
+        size = 4
+    }, 10)
+
+    batchLoad(false, {
+        texturePath = "assets/block.png",
+        offset = 64,
+        size = 4
+    }, 10, 2)
+
+    local win = entityHandler:newWorldEntity({
+        texturePath = "assets/block.png",
+        Position = Vector2.new(20 * 64, 8 * 64),
+        size = 4
+    })
+
+    entityHandler.player.Vector2.x = 15
+    entityHandler.player.Vector2.y = 15
 end
 
 function love2D.update(deltaTime)
-    playerModule:movePlayer(player, world, deltaTime)
+    playerModule:movePlayer(entityHandler.player, entityHandler.world, deltaTime)
 end
 
 function love2D.draw()
-    for i=1, #objects do
-        if objects[i].Sprite then
-            love2D.graphics.draw(
-                objects[i].Sprite,
-                objects[i].Vector2.x, objects[i].Vector2.y,
-                0, 
-                objects[i].Size.x, objects[i].Size.y
-           )
-        end
+    drawWrapper(entityHandler.player)
+
+    for i=1, #entityHandler.entityList do
+        local objects = entityHandler.entityList
+        drawWrapper(objects[i])
     end
 end
