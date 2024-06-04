@@ -11,15 +11,17 @@ local Vector2 = require("include.libs.Vector2")
 
 local function setupEntityTable(self, entity)
     if entity then
-        if entity.texturePath then
+        if entity.sprite then
+            self.Sprite = entity.sprite
+        elseif entity.texturePath then
             self.Sprite = module:loadEntityImage(entity.texturePath)
-    
-            if self.Sprite then
-                self.SpriteSize = Vector2.new(
-                    self.Sprite:getWidth(),
-                    self.Sprite:getHeight()
-                )
-            end
+        end
+
+        if self.Sprite then
+            self.SpriteSize = Vector2.new(
+                self.Sprite:getWidth(),
+                self.Sprite:getHeight()
+            )
         end
 
         if entity.size then
@@ -64,10 +66,10 @@ end
 function module:loadEntityImage(texturePath)
     local info = love2D.filesystem.getInfo(texturePath)
     if info then
-        self.Sprite = love2D.graphics.newImage(texturePath)
-        self.Sprite:setFilter("nearest", "linear")
+        local Sprite = love2D.graphics.newImage(texturePath)
+        Sprite:setFilter("nearest", "linear")
 
-        return self.Sprite
+        return Sprite
     end
 end
 
