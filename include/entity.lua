@@ -14,7 +14,7 @@ local function setupEntityTable(self, entity)
         if entity.sprite then
             self.Sprite = entity.sprite
         elseif entity.texturePath then
-            self.Sprite = module:loadEntityImage(entity.texturePath)
+            self.Sprite = module:loadImage(entity.texturePath)
         end
 
         if self.Sprite then
@@ -63,11 +63,18 @@ function module.newEntity(entity)
     return setmetatable(self, module)
 end
 
-function module:loadEntityImage(texturePath)
+function module:loadImage(texturePath, anyTable)
     local info = love2D.filesystem.getInfo(texturePath)
+
     if info then
         local Sprite = love2D.graphics.newImage(texturePath)
         Sprite:setFilter("nearest", "linear")
+
+        if anyTable then
+            local ID = #anyTable + 1
+            table.insert(anyTable, ID, Sprite)
+            return ID
+        end
 
         return Sprite
     end
